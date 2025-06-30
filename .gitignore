@@ -37,7 +37,6 @@ Thumbs.db
 *.tmp
 
 # Model checkpoints and large files
-*.pth
 *.h5
 *.ckpt
 
