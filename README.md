@@ -139,7 +139,9 @@ Framework: PyTorch
 
 | Input Image | Binary Mask | Overlay Image |
 |-------------|-------------|---------------|
-| ![Input](images/inupt.png)) | ![Mask](images/glacial_lake_mask.png) | ![Overlay](images/glacial_lake_overlay.png) |
+| ![Input](images/inupt.png) | ![Mask](images/glacial_lake_mask.png) | ![Overlay](images/glacial_lake_overlay.png) |
+
+![Analysis](images/pred.png)
 
 ## 📉 Confusion Matrix & Metrics
 
