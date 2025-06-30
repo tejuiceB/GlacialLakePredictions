@@ -863,4 +863,4 @@ glacial-lake-detection/
 
 ## 👤 Author
 
-[Tejas Bhurbhure](https://github.com/tejuiceB)
+[Tejas Bhurbhure(NeuroMiners)](https://github.com/tejuiceB)
