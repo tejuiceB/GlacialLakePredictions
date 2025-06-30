@@ -8,6 +8,310 @@ This project automates the detection of glacial lakes using satellite imagery th
 
 Due to climate change and accelerated glacial melt, new glacial lakes are forming and existing ones are expanding across mountainous regions. These lakes pose potential dangers through Glacial Lake Outburst Floods (GLOFs). Manual monitoring is time-consuming and resource-intensive, making automated detection crucial for timely risk assessment.
 
+## 👥 Use Case Diagram
+
+### Primary Actors and Use Cases
+
+```mermaid
+graph TB
+    subgraph "Glacial Lake Detection System"
+        subgraph "Core System Functions"
+            UC1[Upload Satellite Image]
+            UC2[Process Image]
+            UC3[Generate Lake Mask]
+            UC4[Create Visualizations]
+            UC5[Download Results]
+            UC6[Analyze Lake Coverage]
+            UC7[Extract Contours]
+            UC8[View Historical Data]
+            UC9[Export Reports]
+            UC10[Validate Results]
+        end
+        
+        subgraph "Administrative Functions"
+            UC11[Monitor System Performance]
+            UC12[Update Model]
+            UC13[Manage User Access]
+            UC14[Configure System Settings]
+        end
+        
+        subgraph "Research Functions"
+            UC15[Compare Time Series]
+            UC16[Conduct Analysis]
+            UC17[Publish Findings]
+            UC18[Collaborate with Team]
+        end
+    end
+    
+    subgraph "External Actors"
+        Actor1[Research Scientist]
+        Actor2[Government Official]
+        Actor3[Climate Researcher]
+        Actor4[Disaster Management Officer]
+        Actor5[System Administrator]
+        Actor6[Data Analyst]
+        Actor7[Policy Maker]
+        Actor8[Academic Researcher]
+    end
+    
+    subgraph "External Systems"
+        Ext1[Satellite Data Provider]
+        Ext2[Weather API]
+        Ext3[GIS Systems]
+        Ext4[Report Generation System]
+    end
+    
+    %% Primary Actor Relationships
+    Actor1 --> UC1
+    Actor1 --> UC2
+    Actor1 --> UC3
+    Actor1 --> UC4
+    Actor1 --> UC5
+    Actor1 --> UC15
+    Actor1 --> UC16
+    Actor1 --> UC17
+    
+    Actor2 --> UC1
+    Actor2 --> UC6
+    Actor2 --> UC8
+    Actor2 --> UC9
+    Actor2 --> UC10
+    
+    Actor3 --> UC1
+    Actor3 --> UC2
+    Actor3 --> UC15
+    Actor3 --> UC16
+    Actor3 --> UC18
+    
+    Actor4 --> UC6
+    Actor4 --> UC7
+    Actor4 --> UC8
+    Actor4 --> UC9
+    Actor4 --> UC10
+    
+    Actor5 --> UC11
+    Actor5 --> UC12
+    Actor5 --> UC13
+    Actor5 --> UC14
+    
+    Actor6 --> UC1
+    Actor6 --> UC6
+    Actor6 --> UC9
+    Actor6 --> UC16
+    
+    Actor7 --> UC8
+    Actor7 --> UC9
+    Actor7 --> UC10
+    
+    Actor8 --> UC1
+    Actor8 --> UC15
+    Actor8 --> UC17
+    Actor8 --> UC18
+    
+    %% External System Relationships
+    UC1 --> Ext1
+    UC8 --> Ext2
+    UC9 --> Ext3
+    UC9 --> Ext4
+```
+
+### Detailed Use Case Descriptions
+
+#### **Primary Use Cases**
+
+| Use Case | Actor | Description | Preconditions | Postconditions |
+|----------|-------|-------------|---------------|----------------|
+| **Upload Satellite Image** | Research Scientist, Government Official, Climate Researcher | User uploads satellite imagery files (.tif, .png, .jpg) for analysis | System is running, User has image file | Image is uploaded and validated |
+| **Process Image** | Research Scientist, Climate Researcher | System preprocesses the uploaded image for ML model input | Image is uploaded | Image is ready for model inference |
+| **Generate Lake Mask** | All Primary Actors | ML model generates binary mask identifying glacial lakes | Preprocessed image available | Binary mask is generated |
+| **Create Visualizations** | All Primary Actors | System creates various visualizations (overlay, contours, analysis) | Lake mask is generated | Visualizations are displayed |
+| **Download Results** | All Primary Actors | User downloads generated masks, overlays, or reports | Results are available | Files are downloaded to user's device |
+| **Analyze Lake Coverage** | Government Official, Disaster Management Officer | Calculate and display lake coverage statistics | Lake mask is generated | Coverage metrics are displayed |
+| **Extract Contours** | Disaster Management Officer, Data Analyst | Extract and visualize lake boundaries | Binary mask is available | Contours are extracted and displayed |
+| **View Historical Data** | Government Official, Policy Maker | Access historical lake data and trends | Historical data exists | Historical analysis is displayed |
+| **Export Reports** | Government Official, Policy Maker, Data Analyst | Generate and export detailed analysis reports | Analysis is complete | Report is generated and exported |
+
+#### **Administrative Use Cases**
+
+| Use Case | Actor | Description | Preconditions | Postconditions |
+|----------|-------|-------------|---------------|----------------|
+| **Monitor System Performance** | System Administrator | Monitor application performance and usage | Admin access granted | Performance metrics are visible |
+| **Update Model** | System Administrator | Deploy new or updated ML models | New model is available | Model is updated in system |
+| **Manage User Access** | System Administrator | Control user permissions and access levels | Admin privileges | User access is configured |
+| **Configure System Settings** | System Administrator | Modify system configuration parameters | Admin access | Settings are updated |
+
+#### **Research Use Cases**
+
+| Use Case | Actor | Description | Preconditions | Postconditions |
+|----------|-------|-------------|---------------|----------------|
+| **Compare Time Series** | Research Scientist, Academic Researcher | Compare lake changes over multiple time periods | Multiple datasets available | Temporal analysis is complete |
+| **Conduct Analysis** | Research Scientist, Climate Researcher, Data Analyst | Perform detailed scientific analysis of results | Results are available | Analysis is documented |
+| **Publish Findings** | Research Scientist, Academic Researcher | Share research findings with scientific community | Analysis is complete | Findings are published |
+| **Collaborate with Team** | Research Scientist, Academic Researcher | Share data and collaborate with research team | Team access is configured | Collaboration is facilitated |
+
+### Actor Relationship Diagram
+
+```mermaid
+graph LR
+    subgraph "Primary Actors"
+        A1[Research Scientist]
+        A2[Climate Researcher] 
+        A3[Academic Researcher]
+    end
+    
+    subgraph "Government Actors"
+        A4[Government Official]
+        A5[Policy Maker]
+        A6[Disaster Management Officer]
+    end
+    
+    subgraph "Technical Actors"
+        A7[System Administrator]
+        A8[Data Analyst]
+    end
+    
+    subgraph "System Boundary"
+        S[Glacial Lake Detection System]
+    end
+    
+    A1 -.-> A2
+    A1 -.-> A3
+    A2 -.-> A3
+    A4 -.-> A5
+    A4 -.-> A6
+    A5 -.-> A6
+    
+    A1 --> S
+    A2 --> S
+    A3 --> S
+    A4 --> S
+    A5 --> S
+    A6 --> S
+    A7 --> S
+    A8 --> S
+```
+
+### System Context Use Case
+
+```mermaid
+flowchart TD
+    subgraph "External Environment"
+        Satellites[Satellite Data Sources]
+        Weather[Weather Services]
+        GIS[GIS Platforms]
+        Research[Research Databases]
+    end
+    
+    subgraph "Glacial Lake Detection System"
+        Core[Core Detection Engine]
+        Analysis[Analysis Module]
+        Visualization[Visualization Engine]
+        Export[Export Module]
+    end
+    
+    subgraph "Stakeholders"
+        Scientists[Scientists & Researchers]
+        Government[Government & Policy Makers]
+        Disaster[Disaster Management]
+        Public[General Public]
+    end
+    
+    Satellites --> Core
+    Weather --> Analysis
+    Research --> Analysis
+    
+    Core --> Visualization
+    Analysis --> Visualization
+    Visualization --> Export
+    
+    Scientists --> Core
+    Scientists --> Analysis
+    
+    Government --> Visualization
+    Government --> Export
+    
+    Disaster --> Analysis
+    Disaster --> Export
+    
+    Export --> GIS
+    Export --> Research
+    
+    Public --> Visualization
+```
+
+### Use Case Scenarios
+
+#### **Scenario 1: Research Scientist Workflow**
+
+```mermaid
+sequenceDiagram
+    participant RS as Research Scientist
+    participant Sys as System
+    participant ML as ML Model
+    participant Viz as Visualization
+    participant Export as Export Module
+    
+    RS->>Sys: Upload Sentinel-2 Image
+    Sys->>Sys: Validate Image Format
+    Sys->>ML: Process Image
+    ML->>ML: Generate Lake Mask
+    ML->>Viz: Send Results
+    Viz->>RS: Display Visualizations
+    RS->>Export: Request Download
+    Export->>RS: Provide Results File
+    RS->>Sys: Upload Historical Images
+    Sys->>Viz: Generate Time Series Analysis
+    Viz->>RS: Show Temporal Changes
+```
+
+#### **Scenario 2: Government Official Monitoring**
+
+```mermaid
+sequenceDiagram
+    participant GO as Government Official
+    participant Sys as System
+    participant DB as Database
+    participant Report as Report Generator
+    participant Alert as Alert System
+    
+    GO->>Sys: Access Dashboard
+    Sys->>DB: Fetch Regional Data
+    DB->>Sys: Return Lake Status
+    Sys->>GO: Display Overview
+    GO->>Sys: Request Detailed Analysis
+    Sys->>Report: Generate Report
+    Report->>GO: Provide PDF Report
+    
+    Note over Alert: If Risk Detected
+    Alert->>GO: Send Risk Notification
+    GO->>Sys: Access Risk Details
+    Sys->>GO: Show Risk Assessment
+```
+
+#### **Scenario 3: Disaster Management Response**
+
+```mermaid
+sequenceDiagram
+    participant DM as Disaster Manager
+    participant Sys as System
+    participant Analysis as Analysis Engine
+    participant GIS as GIS Integration
+    participant Comm as Communication System
+    
+    DM->>Sys: Monitor High-Risk Areas
+    Sys->>Analysis: Analyze Current Status
+    Analysis->>Sys: Return Risk Assessment
+    Sys->>DM: Display Risk Levels
+    
+    Note over Analysis: Critical Risk Detected
+    Analysis->>Comm: Trigger Alert
+    Comm->>DM: Emergency Notification
+    DM->>Sys: Request Detailed Maps
+    Sys->>GIS: Generate Risk Maps
+    GIS->>DM: Provide Actionable Maps
+    DM->>Comm: Issue Public Warning
+```
+
 ## 🏗️ System Architecture Overview
 
 ### High-Level System Architecture
