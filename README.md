@@ -2,120 +2,418 @@
 
 This project uses deep learning for automated detection of **glacial lakes** from multi-source satellite imagery (Sentinel-2 `.tif`, PNG). Built with a U-Net segmentation model, it enables climate change analysis, risk prediction, and future feature tracking.
 
-
 ## 📖 Project Overview
 
 This project automates the detection of glacial lakes using satellite imagery through semantic segmentation. It helps monitor the formation and expansion of glacial lakes, which are critical indicators of climate change and potential GLOF (Glacial Lake Outburst Flood) risks.
 
 Due to climate change and accelerated glacial melt, new glacial lakes are forming and existing ones are expanding across mountainous regions. These lakes pose potential dangers through Glacial Lake Outburst Floods (GLOFs). Manual monitoring is time-consuming and resource-intensive, making automated detection crucial for timely risk assessment.
 
-## 🔄 Application Architecture & User Workflow
+## 🏗️ System Architecture Overview
 
-### User Interaction Flow
+### High-Level System Architecture
+
+```mermaid
+graph TB
+    subgraph "User Interface Layer"
+        WebApp[Streamlit Web Application]
+        FileUpload[File Upload Interface]
+        Visualization[Visualization Dashboard]
+    end
+    
+    subgraph "Processing Layer"
+        ImageProcessor[Image Preprocessing]
+        MLInference[ML Inference Engine]
+        PostProcessor[Post Processing]
+    end
+    
+    subgraph "Model Layer"
+        UNet[U-Net Segmentation Model]
+        ResNet[ResNet-18 Backbone]
+        ModelWeights[Trained Model Weights]
+    end
+    
+    subgraph "Storage Layer"
+        TempStorage[Temporary File Storage]
+        Results[Results Cache]
+        Downloads[Download Files]
+    end
+    
+    subgraph "External Data Sources"
+        Sentinel[Sentinel-2 Imagery]
+        UserImages[User Uploaded Images]
+        Annotations[Manual Annotations]
+    end
+    
+    WebApp --> FileUpload
+    FileUpload --> ImageProcessor
+    ImageProcessor --> MLInference
+    MLInference --> UNet
+    UNet --> ResNet
+    ResNet --> ModelWeights
+    MLInference --> PostProcessor
+    PostProcessor --> Visualization
+    Visualization --> WebApp
+    
+    ImageProcessor --> TempStorage
+    PostProcessor --> Results
+    Results --> Downloads
+    
+    Sentinel --> ImageProcessor
+    UserImages --> FileUpload
+    Annotations --> ModelWeights
+```
+
+### Detailed Component Architecture
+
+```mermaid
+graph LR
+    subgraph "Frontend Components"
+        UI[Streamlit UI]
+        Tabs[Visualization Tabs]
+        Downloads[Download Buttons]
+        Metrics[Analysis Metrics]
+    end
+    
+    subgraph "Core Processing"
+        Preprocess[Image Preprocessing]
+        ModelLoad[Model Loading]
+        Inference[Inference Pipeline]
+        Postprocess[Post Processing]
+    end
+    
+    subgraph "Visualization Engine"
+        MaskViz[Mask Visualization]
+        OverlayViz[Overlay Generation]
+        ContourViz[Contour Extraction]
+        StatsViz[Statistical Analysis]
+    end
+    
+    subgraph "File Management"
+        Upload[File Upload Handler]
+        Validation[Format Validation]
+        TempFiles[Temporary Storage]
+        Export[Export Manager]
+    end
+    
+    UI --> Upload
+    Upload --> Validation
+    Validation --> Preprocess
+    Preprocess --> ModelLoad
+    ModelLoad --> Inference
+    Inference --> Postprocess
+    
+    Postprocess --> MaskViz
+    Postprocess --> OverlayViz
+    Postprocess --> ContourViz
+    Postprocess --> StatsViz
+    
+    MaskViz --> Tabs
+    OverlayViz --> Tabs
+    ContourViz --> Tabs
+    StatsViz --> Metrics
+    
+    Tabs --> Downloads
+    Downloads --> Export
+    Export --> TempFiles
+```
+
+## 🔄 User Interaction Flow
+
+### Complete User Journey
 
 ```mermaid
 flowchart TD
-    A[Start Streamlit App] --> B[Upload Satellite Image]
-    B --> C[Image Preprocessing]
-    C --> D[Model Inference]
-    D --> E[Display Results]
-    E --> F[Download Options]
-    F --> G[User Feedback]
-    G -->|Positive| H[Continue Monitoring]
-    G -->|Negative| I[Report Issue]
-    I --> J[Review & Fix Issues]
-    J --> E
+    Start([User Access Application]) --> LoadApp[Application Loads]
+    LoadApp --> ModelCheck{Model Available?}
+    ModelCheck -->|No| Error[Display Error Message]
+    ModelCheck -->|Yes| Dashboard[Show Main Dashboard]
+    
+    Dashboard --> Upload[User Uploads Image]
+    Upload --> ValidateFile{Valid File Type?}
+    ValidateFile -->|No| FileError[Show File Error]
+    ValidateFile -->|Yes| DisplayOriginal[Display Original Image]
+    
+    DisplayOriginal --> StartProcessing[Start ML Processing]
+    StartProcessing --> Preprocess[Image Preprocessing]
+    Preprocess --> RunModel[Run U-Net Model]
+    RunModel --> GenerateMask[Generate Binary Mask]
+    GenerateMask --> CreateVisualizations[Create Visualizations]
+    
+    CreateVisualizations --> ShowTabs[Display Result Tabs]
+    ShowTabs --> UserChoice{User Selects Tab}
+    
+    UserChoice -->|Mask| MaskTab[Binary Mask View]
+    UserChoice -->|Overlay| OverlayTab[Overlay View]
+    UserChoice -->|Contours| ContourTab[Contour View]
+    UserChoice -->|Analysis| AnalysisTab[Statistical Analysis]
+    
+    MaskTab --> DownloadOption[Download Option]
+    OverlayTab --> DownloadOption
+    ContourTab --> DownloadOption
+    AnalysisTab --> DownloadOption
+    
+    DownloadOption --> Continue{Continue?}
+    Continue -->|Yes| Upload
+    Continue -->|No| End([Session End])
+    
+    FileError --> Upload
+    Error --> End
 ```
 
-1. **Start Streamlit App**: User launches the application.
-2. **Upload Satellite Image**: User uploads a satellite image in `.tif`, `.png`, or `.jpg` format.
-3. **Image Preprocessing**: The application preprocesses the image (resizing, normalization).
-4. **Model Inference**: The trained U-Net model predicts the glacial lake mask.
-5. **Display Results**: The application displays the original image, predicted mask, and overlay.
-6. **Download Options**: User can download the results (masks, overlays, contours).
-7. **User Feedback**: User provides feedback on the results (positive/negative).
-8. **Continue Monitoring**: Positive feedback leads to continued monitoring of glacial lakes.
-9. **Report Issue**: Negative feedback allows users to report issues or inaccuracies.
-10. **Review & Fix Issues**: The development team reviews and addresses reported issues.
+### Detailed Processing Pipeline
 
-### System Architecture
-
-```
-+-------------------------+
-| Download Sentinel-2 .tif images |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Preprocess with Rasterio |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Crop to 256x256 patches |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Manually annotate lakes using LabelMe |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Convert annotations to binary .png masks |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Convert PNG pairs to .npy |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Train U-Net on (image, mask) pairs |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Evaluate metrics, save model |
-+-------------------------+
-            |
-            v
-+-------------------------+
-| Deploy using Streamlit app |
-+-------------------------+
+```mermaid
+sequenceDiagram
+    participant User
+    participant StreamlitUI as Streamlit UI
+    participant ImageProc as Image Processor
+    participant Model as U-Net Model
+    participant Visualizer as Visualization Engine
+    participant FileManager as File Manager
+    
+    User->>StreamlitUI: Upload satellite image
+    StreamlitUI->>ImageProc: Process uploaded file
+    
+    Note over ImageProc: File type validation
+    ImageProc->>ImageProc: Validate file format
+    ImageProc->>ImageProc: Load image (PIL/Rasterio)
+    ImageProc->>ImageProc: Resize to 256x256
+    ImageProc->>ImageProc: Normalize pixel values
+    
+    ImageProc->>Model: Send preprocessed tensor
+    
+    Note over Model: ML Inference
+    Model->>Model: Forward pass through U-Net
+    Model->>Model: Apply sigmoid activation
+    Model->>Model: Generate probability mask
+    
+    Model->>Visualizer: Return prediction probabilities
+    
+    Note over Visualizer: Post-processing
+    Visualizer->>Visualizer: Apply threshold (0.5)
+    Visualizer->>Visualizer: Create binary mask
+    Visualizer->>Visualizer: Generate overlay image
+    Visualizer->>Visualizer: Extract contours
+    Visualizer->>Visualizer: Calculate statistics
+    
+    Visualizer->>StreamlitUI: Send all visualizations
+    StreamlitUI->>User: Display tabbed results
+    
+    User->>StreamlitUI: Request download
+    StreamlitUI->>FileManager: Prepare download file
+    FileManager->>User: Provide download link
 ```
 
-### Model Architecture
+## 🧠 Model Architecture Flow
 
-```text
-U-Net Semantic Segmentation Model
-----------------------------------
-Encoder: ResNet-18 pretrained on ImageNet
-Input: 3-channel RGB satellite crops (256x256)
-Decoder: Transposed Convolutions + Concatenation Skip Connections
-Output: 1-channel binary mask (Lake = 1, Background = 0)
-Loss: Binary Cross Entropy with Logits
-Optimizer: Adam
-Framework: PyTorch
+### U-Net Architecture Details
+
+```mermaid
+graph TD
+    subgraph "Input Layer"
+        Input[RGB Image 256x256x3]
+    end
+    
+    subgraph "Encoder (ResNet-18)"
+        Conv1[Conv Block 1]
+        Conv2[Conv Block 2]
+        Conv3[Conv Block 3]
+        Conv4[Conv Block 4]
+        Bottleneck[Bottleneck Features]
+    end
+    
+    subgraph "Decoder"
+        Up1[Upconv Block 1]
+        Up2[Upconv Block 2]
+        Up3[Upconv Block 3]
+        Up4[Upconv Block 4]
+    end
+    
+    subgraph "Output Layer"
+        Output[Binary Mask 256x256x1]
+    end
+    
+    subgraph "Skip Connections"
+        Skip1[Skip Connection 1]
+        Skip2[Skip Connection 2]
+        Skip3[Skip Connection 3]
+        Skip4[Skip Connection 4]
+    end
+    
+    Input --> Conv1
+    Conv1 --> Conv2
+    Conv2 --> Conv3
+    Conv3 --> Conv4
+    Conv4 --> Bottleneck
+    
+    Bottleneck --> Up1
+    Up1 --> Up2
+    Up2 --> Up3
+    Up3 --> Up4
+    Up4 --> Output
+    
+    Conv1 --> Skip1
+    Conv2 --> Skip2
+    Conv3 --> Skip3
+    Conv4 --> Skip4
+    
+    Skip1 --> Up4
+    Skip2 --> Up3
+    Skip3 --> Up2
+    Skip4 --> Up1
 ```
 
-✅ Total images: 40
-✅ Total masks: 40
-🖥️ Trained on: Google Colab (CUDA GPU)
+### Training and Inference Pipeline
 
-## 🔄 Workflow
+```mermaid
+flowchart LR
+    subgraph "Training Phase"
+        SatelliteData[Sentinel-2 Data] --> Annotation[Manual Annotation]
+        Annotation --> TrainingSet[Training Dataset]
+        TrainingSet --> ModelTraining[U-Net Training]
+        ModelTraining --> SavedModel[Saved Model Weights]
+    end
+    
+    subgraph "Inference Phase"
+        UserImage[User Input Image] --> Preprocessing[Image Preprocessing]
+        Preprocessing --> LoadModel[Load Trained Model]
+        SavedModel --> LoadModel
+        LoadModel --> Prediction[Generate Prediction]
+        Prediction --> Postprocessing[Post-processing]
+        Postprocessing --> Results[Final Results]
+    end
+    
+    subgraph "Validation"
+        Results --> Metrics[Calculate Metrics]
+        Metrics --> Accuracy[Accuracy: 78.15%]
+        Metrics --> Precision[Precision: 79.85%]
+        Metrics --> Recall[Recall: 95.32%]
+        Metrics --> F1Score[F1 Score: 86.86%]
+        Metrics --> IoU[IoU: 76.37%]
+    end
+```
 
-1. **Data Acquisition**: Download `.tif` satellite images from Sentinel-2
-2. **Data Preparation**: Crop and annotate glacial lake boundaries (LabelMe)
-3. **Dataset Creation**: Convert annotations to `.npy` image–mask dataset
-4. **Model Training**: Train U-Net segmentation model (ResNet-18 backbone)
-5. **Model Deployment**: Export trained model for inference
-6. **Interactive App**: Run inference via interactive Streamlit app
+## 📊 Data Flow Architecture
 
-📥 Total `.tif` files used: 9
-📤 Final `.npy` image-mask pairs: 40
-🧠 Model file: `unet_model_augmented.pth`
+### End-to-End Data Processing
+
+```mermaid
+flowchart TD
+    subgraph "Data Sources"
+        Sentinel2[Sentinel-2 Satellite Imagery]
+        UserUploads[User Uploaded Images]
+        HistoricalData[Historical Lake Data]
+    end
+    
+    subgraph "Data Ingestion"
+        FileUpload[File Upload Handler]
+        FormatValidation[Format Validation]
+        TypeDetection[Image Type Detection]
+    end
+    
+    subgraph "Preprocessing Pipeline"
+        LoadImage[Image Loading]
+        Resize[Resize to 256x256]
+        Normalize[Pixel Normalization]
+        TensorConversion[Tensor Conversion]
+    end
+    
+    subgraph "ML Processing"
+        ModelInference[U-Net Inference]
+        ProbabilityMask[Probability Mask]
+        BinaryThreshold[Binary Thresholding]
+        MaskGeneration[Binary Mask Generation]
+    end
+    
+    subgraph "Visualization Processing"
+        OverlayCreation[Overlay Image Creation]
+        ContourExtraction[Contour Extraction]
+        StatisticalAnalysis[Statistical Analysis]
+        MetricsCalculation[Metrics Calculation]
+    end
+    
+    subgraph "Output Generation"
+        TabVisualization[Tabbed Visualization]
+        DownloadFiles[Download File Generation]
+        ResultDisplay[Result Display]
+    end
+    
+    Sentinel2 --> FileUpload
+    UserUploads --> FileUpload
+    HistoricalData --> FileUpload
+    
+    FileUpload --> FormatValidation
+    FormatValidation --> TypeDetection
+    TypeDetection --> LoadImage
+    
+    LoadImage --> Resize
+    Resize --> Normalize
+    Normalize --> TensorConversion
+    
+    TensorConversion --> ModelInference
+    ModelInference --> ProbabilityMask
+    ProbabilityMask --> BinaryThreshold
+    BinaryThreshold --> MaskGeneration
+    
+    MaskGeneration --> OverlayCreation
+    MaskGeneration --> ContourExtraction
+    MaskGeneration --> StatisticalAnalysis
+    StatisticalAnalysis --> MetricsCalculation
+    
+    OverlayCreation --> TabVisualization
+    ContourExtraction --> TabVisualization
+    MetricsCalculation --> TabVisualization
+    TabVisualization --> DownloadFiles
+    TabVisualization --> ResultDisplay
+```
+
+## 🔧 Technical Implementation Flow
+
+### Application Startup and Model Loading
+
+```mermaid
+sequenceDiagram
+    participant App as Streamlit App
+    participant Cache as Streamlit Cache
+    participant Model as Model Loader
+    participant UI as User Interface
+    
+    App->>Cache: Check for cached model
+    Cache->>Model: Load U-Net model
+    Model->>Model: Load segmentation_models_pytorch
+    Model->>Model: Initialize ResNet-18 backbone
+    Model->>Model: Load trained weights
+    Model->>Model: Set model to eval mode
+    Model->>Cache: Return loaded model
+    Cache->>App: Model ready
+    App->>UI: Display main interface
+    UI->>App: Ready for user input
+```
+
+### Error Handling and Fallback Systems
+
+```mermaid
+flowchart TD
+    UserAction[User Action] --> TryMain[Try Main Function]
+    TryMain --> CheckDependencies{Check Dependencies}
+    
+    CheckDependencies -->|SMP Missing| SMPError[segmentation_models_pytorch Error]
+    CheckDependencies -->|GDAL Missing| GDALError[GDAL Error]
+    CheckDependencies -->|SKImage Missing| SKImageError[scikit-image Error]
+    CheckDependencies -->|All OK| ProcessNormal[Normal Processing]
+    
+    SMPError --> FallbackModel[Use Fallback Model Loading]
+    GDALError --> FallbackImage[Use PIL for Image Loading]
+    SKImageError --> FallbackContour[Use OpenCV for Contours]
+    
+    FallbackModel --> LimitedFunction[Limited Functionality Mode]
+    FallbackImage --> ProcessNormal
+    FallbackContour --> ProcessNormal
+    
+    LimitedFunction --> ShowWarning[Display Warning Message]
+    ProcessNormal --> Success[Successful Processing]
+    ShowWarning --> Success
+```
 
 ## 🎨 Sample Results
 
