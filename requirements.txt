@@ -10,3 +10,4 @@ requests
 gdown
 rasterio
 albumentations
+scikit-image
