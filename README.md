@@ -2,24 +2,6 @@
 
 This project uses deep learning for automated detection of **glacial lakes** from multi-source satellite imagery (Sentinel-2 `.tif`, PNG). Built with a U-Net segmentation model, it enables climate change analysis, risk prediction, and future feature tracking.
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Application Architecture & User Workflow](#application-architecture--user-workflow)
-- [Architecture Diagram](#architecture-diagram)
-- [Workflow](#workflow)
-- [Sample Results](#sample-results)
-- [Confusion Matrix & Metrics](#confusion-matrix--metrics)
-- [Features](#features)
-- [Installation & Run](#installation--run)
-- [Usage](#usage)
-- [Model Details](#model-details)
-- [Project Structure](#project-structure)
-- [Future Work](#future-work)
-- [Troubleshooting](#troubleshooting)
-- [References & Resources](#references--resources)
-- [Author](#author)
-- [License](#license)
 
 ## 📖 Project Overview
 
