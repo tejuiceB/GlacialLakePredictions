@@ -58,16 +58,50 @@ flowchart TD
 
 ### System Architecture
 
-```mermaid
-flowchart TD
-    A[Download Sentinel-2 .tif images] --> B[Preprocess with Rasterio]
-    B --> C[Crop to 256x256 patches]
-    C --> D[Manually annotate lakes using LabelMe]
-    D --> E[Convert annotations to binary .png masks]
-    E --> F[Convert PNG pairs to .npy]
-    F --> G[Train U-Net on (image, mask) pairs]
-    G --> H[Evaluate metrics, save model]
-    H --> I[Deploy using Streamlit app]
+```
++-------------------------+
+| Download Sentinel-2 .tif images |
++-------------------------+
+            |
+            v
++-------------------------+
+| Preprocess with Rasterio |
++-------------------------+
+            |
+            v
++-------------------------+
+| Crop to 256x256 patches |
++-------------------------+
+            |
+            v
++-------------------------+
+| Manually annotate lakes using LabelMe |
++-------------------------+
+            |
+            v
++-------------------------+
+| Convert annotations to binary .png masks |
++-------------------------+
+            |
+            v
++-------------------------+
+| Convert PNG pairs to .npy |
++-------------------------+
+            |
+            v
++-------------------------+
+| Train U-Net on (image, mask) pairs |
++-------------------------+
+            |
+            v
++-------------------------+
+| Evaluate metrics, save model |
++-------------------------+
+            |
+            v
++-------------------------+
+| Deploy using Streamlit app |
++-------------------------+
 ```
 
 ### Model Architecture
