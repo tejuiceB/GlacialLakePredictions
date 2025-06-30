@@ -261,7 +261,7 @@ glacial-lake-detection/
 
 ## 👤 Author
 
-[Your Name](https://github.com/yourusername)
+[Tejas Bhurbhure](https://github.com/tejuiceB)
 
 ## 📄 License
 
